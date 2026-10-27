@@ -1,0 +1,541 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Task 1 builder">
+<meta name="theme-color" content="#F3F6F8">
+<title>Task 1 graph builder</title>
+<style>
+  :root{
+    --paper:#F3F6F8; --grid:#DCE5EA; --grid-2:#C3D0D8;
+    --ink:#16232E; --mute:#64757F;
+    --mark:#C63D22; --mark-soft:#FAEBE7; --pen-soft:#E4EDF7;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --note:ui-serif,Georgia,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);overscroll-behavior:none}
+  body{padding:20px 16px 56px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  .wrap{max-width:780px;margin:0 auto}
+  h1{font-size:19px;font-weight:600;margin:0 0 2px;letter-spacing:-.01em}
+  .sub{font-size:13px;color:var(--mute);margin:0 0 18px;line-height:1.5}
+  h2{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--mute);margin:0 0 9px}
+  h2 .of{text-transform:none;letter-spacing:0;font-weight:400}
+  .slot{margin-bottom:26px;padding-bottom:22px;border-bottom:2px solid var(--grid-2)}
+  .slot:last-of-type{border-bottom:0}
+  .card{background:#fff;border:1px solid var(--grid-2);border-radius:10px;padding:10px 8px 4px;margin-bottom:12px}
+  svg{display:block;width:100%;height:auto;touch-action:none}
+  details{background:#fff;border:1px solid var(--grid-2);border-radius:10px;margin-bottom:14px;overflow:hidden}
+  summary{padding:13px 15px;font-size:14px;font-weight:500;cursor:pointer;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸ ";color:var(--mute)}
+  details[open] summary::before{content:"▾ "}
+  details[open] summary{border-bottom:1px solid var(--grid)}
+  .panel{padding:15px}
+  .fld{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .fld label{font-size:13px;color:var(--mute);width:92px;flex:none}
+  input{font-family:inherit;font-size:16px;color:var(--ink);background:#fff;border:1px solid var(--grid-2);border-radius:7px;padding:8px 10px;min-height:38px;width:100%;-webkit-user-select:text;user-select:text}
+  input:focus{outline:2px solid #1F5FA8;outline-offset:-1px;border-color:#1F5FA8}
+  .row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .sw{width:16px;height:16px;border-radius:4px;flex:none}
+  .rule{border:0;border-top:1px solid var(--grid);margin:16px 0}
+  button{font-family:inherit;font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--grid-2);border-radius:7px;padding:9px 13px;min-height:38px;cursor:pointer;white-space:nowrap}
+  button:hover{background:var(--pen-soft);border-color:#1F5FA8}
+  button:active{transform:scale(.97)}
+  button:focus-visible{outline:2px solid #1F5FA8;outline-offset:2px}
+  button[aria-pressed="true"]{background:#1F5FA8;border-color:#1F5FA8;color:#fff}
+  .del{padding:6px 11px;min-height:34px;color:var(--mark);flex:none}
+  .del:hover{background:var(--mark-soft);border-color:var(--mark)}
+  .seg-ctl{display:flex;gap:0;margin-bottom:14px}
+  .seg-ctl button{border-radius:0;flex:1;border-right-width:0}
+  .seg-ctl button:first-child{border-radius:7px 0 0 7px}
+  .seg-ctl button:last-child{border-radius:0 7px 7px 0;border-right-width:1px}
+  .bar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+  .legend{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+  .lg{display:flex;align-items:center;gap:7px;font-size:13px;padding:7px 12px;border-radius:999px;border:1px solid var(--grid-2);background:#fff;cursor:pointer;min-height:36px}
+  .lg[aria-pressed="true"]{border-color:var(--ink);border-width:2px;font-weight:500}
+  .readout{font-family:var(--note);font-style:italic;font-size:18px;color:var(--mark);min-height:28px;margin:2px 0 14px;line-height:1.45}
+  .readout .val{font-family:var(--mono);font-style:normal;font-size:14px;color:var(--mute);margin-left:8px}
+  ol{list-style:none;margin:0 0 18px;padding:0;border-top:1px solid var(--grid)}
+  li{display:flex;align-items:baseline;gap:10px;padding:8px 2px;border-bottom:1px solid var(--grid);font-size:14px}
+  li .k{font-family:var(--mono);font-size:12px;color:var(--mute);width:104px;flex:none}
+  li .verb{font-family:var(--note);font-style:italic;font-size:16px;color:var(--mark);flex:1}
+  li .verb.masked{color:var(--grid-2)}
+  li .num{font-family:var(--mono);font-size:12px;color:var(--mute)}
+  .notes{font-family:var(--note);font-style:italic;font-size:15px;color:var(--mark);line-height:1.7;margin:0 0 18px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:13px;padding:6px 11px;border-radius:999px;border:1px solid var(--grid-2);color:var(--mute);background:#fff}
+  .chip.on{background:var(--mark-soft);border-color:var(--mark);color:var(--mark);font-weight:500}
+  .score{font-family:var(--mono);font-size:12px;color:var(--mute);margin:10px 0 0;line-height:1.6}
+  .hint{font-size:12px;color:var(--mute);margin:18px 0 0;line-height:1.6}
+  .glob{display:flex;flex-wrap:wrap;gap:7px;margin:22px 0 0;padding-top:20px;border-top:2px solid var(--grid-2)}
+</style>
+
+<div class="wrap">
+  <h1>Task 1 graph builder</h1>
+  <p class="sub">Two chart slots, as in a combined Task 1. Pick a type, set your own axes, then drag the data. The language for each chart type is worked out live.</p>
+  <div id="slots"></div>
+  <div class="glob">
+    <button id="mask" aria-pressed="false">Hide language</button>
+    <button id="copy">Copy sentences</button>
+    <button id="task">Copy task rubric</button>
+  </div>
+  <p class="hint">Line and bar: drag any point or column. Pie: drag the handle on a boundary — the two slices either side trade share. Keyboard: tab to a handle, then arrow keys.</p>
+</div>
+
+<script>
+(function(){
+var PAL=[["#1F5FA8",""],["#0F7A63","9 5"],["#B36A00","3 4"],["#6B4BA8","12 4 3 4"]];
+var L=58,R=700,T=26,B=336,AX=372;
+var masked=false, drag=null;
+
+var TRENDBANK=["soared","rose sharply","rose gradually","remained flat","fell gradually","fell sharply","plummeted","hit a peak","hit a low","dipped"];
+var BARBANK=["the highest","the lowest","the second highest","twice as many as","three times as many as","half as many as","marginally higher than","almost identical to","far more than","slightly lower than"];
+var PIEBANK=["the largest share","the smallest share","roughly a half","roughly a third","roughly a quarter","roughly a fifth","roughly two thirds","together over half","a negligible proportion","almost equal shares"];
+
+var slots=[
+ {on:true,type:"line",label:"Coal exports",unit:"million tonnes",max:400,act:0,
+  cats:["2000","2005","2010","2015","2020","2025"],
+  series:[{name:"Australia",values:[210,244,286,330,352,318]},{name:"Indonesia",values:[78,132,244,338,296,372]}],
+  slices:[{name:"Power stations",pct:48},{name:"Steel",pct:27},{name:"Cement",pct:15},{name:"Other",pct:10}]},
+ {on:true,type:"pie",label:"Use of imported coal",unit:"%",max:100,act:0,
+  cats:["Asia","Europe","Africa"],
+  series:[{name:"Share",values:[52,31,17]}],
+  slices:[{name:"Power stations",pct:52},{name:"Steel",pct:24},{name:"Cement",pct:16},{name:"Other",pct:8}]}
+];
+
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function dec(s){return s.max<=20?1:0;}
+function fmt(s,v){return dec(s)?v.toFixed(1):String(Math.round(v));}
+function nC(s){return s.cats.length;}
+function px(s,i){return nC(s)<2?L:L+i*((R-L)/(nC(s)-1));}
+function py(s,v){return B-(v/s.max)*(B-T);}
+function toVal(s,yy){var raw=((B-yy)/(B-T))*s.max,p=Math.pow(10,dec(s));return Math.max(0,Math.min(s.max,Math.round(raw*p)/p));}
+
+function verbOf(a,b){
+  var p=a<=0?(b>0?100:0):((b-a)/a)*100, ap=Math.abs(p);
+  if(ap<=3)return "remained flat";
+  if(p>0)return p<=12?"rose gradually":(p<=30?"rose sharply":"soared");
+  return ap<=12?"fell gradually":(ap<=30?"fell sharply":"plummeted");
+}
+function pointNotes(s,se){
+  var v=se.values,out=[],hi=Math.max.apply(null,v),lo=Math.min.apply(null,v),rng=hi-lo||1;
+  for(var i=1;i<v.length-1;i++){var a=v[i-1],c=v[i],b=v[i+1];
+    if(c>a&&c>b&&c>=hi-rng*0.12)out.push([s.cats[i],"hit a peak"]);
+    else if(c<a&&c<b){
+      if(c<=lo+rng*0.12)out.push([s.cats[i],"hit a low"]);
+      else if(a>0&&c>0&&(a-c)/a*100<28&&(b-c)/c*100<28)out.push([s.cats[i],"dipped"]);}}
+  return out;
+}
+function overall(se){
+  var v=se.values,t=0,d=0;
+  for(var i=0;i<v.length-1;i++){var nd=Math.sign(v[i+1]-v[i]);if(nd!==0&&d!==0&&nd!==d)t++;if(nd!==0)d=nd;}
+  if(t>=4)return "fluctuated";
+  if(v[0]<=0)return v[v.length-1]>0?"rose overall":"showed little overall change";
+  var net=(v[v.length-1]-v[0])/v[0]*100;
+  return Math.abs(net)<=5?"showed little overall change":(net>0?"rose overall":"fell overall");
+}
+function crossings(s){
+  var out=[];
+  for(var a=0;a<s.series.length;a++)for(var b=a+1;b<s.series.length;b++){
+    var A=s.series[a],C=s.series[b];
+    for(var i=0;i<nC(s)-1;i++){
+      var d0=A.values[i]-C.values[i],d1=A.values[i+1]-C.values[i+1];
+      if(d0===0||d1===0)continue;
+      if((d0<0)!==(d1<0))out.push((d1>0?A.name:C.name)+" overtook "+(d1>0?C.name:A.name)+" between "+s.cats[i]+" and "+s.cats[i+1]);}}
+  return out;
+}
+function ratio(a,b){
+  if(b<=0)return null;
+  var r=a/b, d=Math.abs(a-b)/b*100;
+  if(d<=3)return "almost identical to";
+  if(r>=1.85&&r<=2.15)return "twice as many as";
+  if(r>=2.8&&r<=3.2)return "three times as many as";
+  if(r>=0.45&&r<=0.55)return "half as many as";
+  if(r>1&&d<=12)return "marginally higher than";
+  if(r<1&&d<=12)return "slightly lower than";
+  if(r>=1.6)return "far more than";
+  return r>1?"higher than":"lower than";
+}
+function barFacts(s){
+  var all=[],i,k;
+  for(k=0;k<s.series.length;k++)for(i=0;i<nC(s);i++)all.push({s:s.series[k].name,c:s.cats[i],v:s.series[k].values[i]});
+  all.sort(function(a,b){return b.v-a.v;});
+  var out=[];
+  if(all.length){
+    out.push([all[0].c+(s.series.length>1?" ("+all[0].s+")":""),"recorded the highest figure, at "+fmt(s,all[0].v)]);
+    if(all.length>1)out.push([all[1].c+(s.series.length>1?" ("+all[1].s+")":""),"was the second highest"]);
+    var lastI=all.length-1;
+    out.push([all[lastI].c+(s.series.length>1?" ("+all[lastI].s+")":""),"recorded the lowest figure, at "+fmt(s,all[lastI].v)]);
+  }
+  var top=s.series[0];
+  if(top)for(i=0;i<nC(s)-1;i++){
+    var r=ratio(top.values[i],top.values[i+1]);
+    if(r&&r!=="higher than"&&r!=="lower than")out.push([s.cats[i]+" vs "+s.cats[i+1],r+" "+s.cats[i+1]]);
+  }
+  return out.slice(0,7);
+}
+function frac(p){
+  if(Math.abs(p-50)<=2.5)return "roughly a half";
+  if(Math.abs(p-33.3)<=2.5)return "roughly a third";
+  if(Math.abs(p-25)<=2.5)return "roughly a quarter";
+  if(Math.abs(p-20)<=2.5)return "roughly a fifth";
+  if(Math.abs(p-66.6)<=3)return "roughly two thirds";
+  if(Math.abs(p-75)<=2.5)return "roughly three quarters";
+  return null;
+}
+function pieFacts(s){
+  var sl=s.slices.slice().sort(function(a,b){return b.pct-a.pct;}),out=[];
+  if(!sl.length)return out;
+  out.push([sl[0].name,"accounted for the largest share, at "+Math.round(sl[0].pct)+"%"]);
+  var f0=frac(sl[0].pct); if(f0)out.push([sl[0].name,"made up "+f0+" of the total"]);
+  if(sl.length>1){
+    var two=sl[0].pct+sl[1].pct;
+    if(two>50)out.push([sl[0].name+" and "+sl[1].name,"together accounted for over half, at "+Math.round(two)+"%"]);
+    var f1=frac(sl[1].pct); if(f1)out.push([sl[1].name,"represented "+f1]);
+    if(Math.abs(sl[0].pct-sl[1].pct)<=2)out.push([sl[0].name+" and "+sl[1].name,"held almost equal shares"]);
+  }
+  var last=sl[sl.length-1];
+  out.push([last.name,(last.pct<=6?"made up a negligible proportion, at ":"accounted for the smallest share, at ")+Math.round(last.pct)+"%"]);
+  for(var i=2;i<sl.length-1;i++){var f=frac(sl[i].pct);if(f)out.push([sl[i].name,"was "+f]);}
+  return out.slice(0,7);
+}
+
+function normPie(s){
+  var t=0; s.slices.forEach(function(x){t+=x.pct;});
+  if(t<=0)return; s.slices.forEach(function(x){x.pct=x.pct/t*100;});
+}
+
+function drawLine(s,idx){
+  var out='',i,k;
+  for(i=0;i<=4;i++){var gy=T+i*((B-T)/4);
+    out+='<line x1="'+L+'" y1="'+gy+'" x2="'+R+'" y2="'+gy+'" stroke="var(--grid)" stroke-width="1"/>'+
+         '<text x="'+(L-11)+'" y="'+(gy+6)+'" font-size="17" fill="var(--mute)" text-anchor="end" font-family="var(--mono)">'+fmt(s,s.max*(1-i/4))+'</text>';}
+  out+='<line x1="'+L+'" y1="'+B+'" x2="'+R+'" y2="'+B+'" stroke="var(--grid-2)" stroke-width="2"/>'+
+       '<text x="'+L+'" y="16" font-size="17" fill="var(--mute)">'+esc(s.label)+(s.unit?" ("+esc(s.unit)+")":"")+'</text>';
+  for(i=0;i<nC(s);i++)out+='<text x="'+px(s,i)+'" y="'+AX+'" font-size="18" fill="var(--mute)" text-anchor="middle">'+esc(s.cats[i])+'</text>';
+  for(k=0;k<s.series.length;k++){
+    var se=s.series[k],c=PAL[k%4][0],d=PAL[k%4][1],pts=[];
+    for(i=0;i<nC(s);i++)pts.push(px(s,i)+","+py(s,se.values[i]));
+    out+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+c+'" stroke-width="'+(k===s.act?4:2.5)+'"'+(d?' stroke-dasharray="'+d+'"':'')+' stroke-linejoin="round" stroke-linecap="round" opacity="'+(k===s.act?1:.55)+'"/>';}
+  var hr=nC(s)<2?34:Math.min(34,((R-L)/(nC(s)-1))*.45);
+  for(k=0;k<s.series.length;k++){var se2=s.series[k],c2=PAL[k%4][0];
+    for(i=0;i<nC(s);i++){
+      out+='<circle class="hit" data-t="pt" data-w="'+idx+'" data-s="'+k+'" data-i="'+i+'" tabindex="0" role="slider" aria-label="'+esc(se2.name)+' '+esc(s.cats[i])+'" aria-valuenow="'+se2.values[i]+'" aria-valuemin="0" aria-valuemax="'+s.max+'" cx="'+px(s,i)+'" cy="'+py(s,se2.values[i])+'" r="'+hr+'" fill="transparent" style="cursor:ns-resize"/>'+
+             '<circle cx="'+px(s,i)+'" cy="'+py(s,se2.values[i])+'" r="'+(k===s.act?9:6.5)+'" fill="#fff" stroke="'+c2+'" stroke-width="3" opacity="'+(k===s.act?1:.6)+'"/>';}}
+  return out;
+}
+
+function drawBar(s,idx){
+  var out='',i,k,ns=s.series.length,gw=(R-L)/nC(s),bw=Math.min(46,(gw-16)/ns);
+  for(i=0;i<=4;i++){var gy=T+i*((B-T)/4);
+    out+='<line x1="'+L+'" y1="'+gy+'" x2="'+R+'" y2="'+gy+'" stroke="var(--grid)" stroke-width="1"/>'+
+         '<text x="'+(L-11)+'" y="'+(gy+6)+'" font-size="17" fill="var(--mute)" text-anchor="end" font-family="var(--mono)">'+fmt(s,s.max*(1-i/4))+'</text>';}
+  out+='<line x1="'+L+'" y1="'+B+'" x2="'+R+'" y2="'+B+'" stroke="var(--grid-2)" stroke-width="2"/>'+
+       '<text x="'+L+'" y="16" font-size="17" fill="var(--mute)">'+esc(s.label)+(s.unit?" ("+esc(s.unit)+")":"")+'</text>';
+  for(i=0;i<nC(s);i++){
+    var cx=L+gw*i+gw/2;
+    out+='<text x="'+cx+'" y="'+AX+'" font-size="18" fill="var(--mute)" text-anchor="middle">'+esc(s.cats[i])+'</text>';
+    for(k=0;k<ns;k++){
+      var v=s.series[k].values[i],bx=cx-(ns*bw)/2+k*bw,h=Math.max(1,B-py(s,v)),c=PAL[k%4][0];
+      out+='<rect x="'+(bx+2)+'" y="'+py(s,v)+'" width="'+(bw-4)+'" height="'+h+'" fill="'+c+'" opacity="'+(k===s.act?.92:.5)+'" rx="3"/>'+
+           '<rect class="hit" data-t="pt" data-w="'+idx+'" data-s="'+k+'" data-i="'+i+'" tabindex="0" role="slider" aria-label="'+esc(s.series[k].name)+' '+esc(s.cats[i])+'" aria-valuenow="'+v+'" aria-valuemin="0" aria-valuemax="'+s.max+'" x="'+bx+'" y="'+T+'" width="'+bw+'" height="'+(B-T)+'" fill="transparent" style="cursor:ns-resize"/>';}}
+  return out;
+}
+
+function drawPie(s,idx){
+  normPie(s);
+  var CX=360,CY=178,RAD=142,out='',cum=0,i;
+  out+='<text x="16" y="18" font-size="17" fill="var(--mute)">'+esc(s.label)+'</text>';
+  for(i=0;i<s.slices.length;i++){
+    var a0=cum/100*360-90, a1=(cum+s.slices[i].pct)/100*360-90, big=(s.slices[i].pct>50)?1:0;
+    var r0=a0*Math.PI/180, r1=a1*Math.PI/180;
+    var x0=CX+RAD*Math.cos(r0), y0=CY+RAD*Math.sin(r0), x1=CX+RAD*Math.cos(r1), y1=CY+RAD*Math.sin(r1);
+    out+='<path d="M '+CX+' '+CY+' L '+x0+' '+y0+' A '+RAD+' '+RAD+' 0 '+big+' 1 '+x1+' '+y1+' Z" fill="'+PAL[i%4][0]+'" opacity="'+(0.9-(i>3?0.25:0)-(i%4)*0.04)+'" stroke="#fff" stroke-width="2.5"/>';
+    if(s.slices[i].pct>=7){
+      var m=(r0+r1)/2;
+      out+='<text x="'+(CX+RAD*0.63*Math.cos(m))+'" y="'+(CY+RAD*0.63*Math.sin(m)+6)+'" font-size="19" fill="#fff" text-anchor="middle" font-family="var(--mono)">'+Math.round(s.slices[i].pct)+'%</text>';}
+    cum+=s.slices[i].pct;
+  }
+  cum=0;
+  for(i=0;i<s.slices.length-1;i++){
+    cum+=s.slices[i].pct;
+    var ab=cum/100*360-90, rb=ab*Math.PI/180, hx=CX+RAD*Math.cos(rb), hy=CY+RAD*Math.sin(rb);
+    out+='<circle cx="'+hx+'" cy="'+hy+'" r="9" fill="#fff" stroke="var(--ink)" stroke-width="3"/>'+
+         '<circle class="hit" data-t="pie" data-w="'+idx+'" data-b="'+i+'" tabindex="0" role="slider" aria-label="Boundary between '+esc(s.slices[i].name)+' and '+esc(s.slices[i+1].name)+'" aria-valuenow="'+Math.round(s.slices[i].pct)+'" aria-valuemin="2" aria-valuemax="96" cx="'+hx+'" cy="'+hy+'" r="34" fill="transparent" style="cursor:grab"/>';
+  }
+  return out;
+}
+
+function facts(s){
+  if(s.type==="pie")return pieFacts(s);
+  if(s.type==="bar")return barFacts(s);
+  var A=s.series[s.act],out=[];
+  if(!A)return out;
+  for(var i=0;i<nC(s)-1;i++)out.push([s.cats[i]+"–"+s.cats[i+1],verbOf(A.values[i],A.values[i+1]),fmt(s,A.values[i])+" → "+fmt(s,A.values[i+1])]);
+  return out;
+}
+
+function bankFor(s){return s.type==="pie"?PIEBANK:(s.type==="bar"?BARBANK:TRENDBANK);}
+
+function lit(s){
+  var f={},i;
+  if(masked)return f;
+  if(s.type==="line"){
+    var A=s.series[s.act]; if(!A)return f;
+    for(i=0;i<nC(s)-1;i++)f[verbOf(A.values[i],A.values[i+1])]=1;
+    pointNotes(s,A).forEach(function(p){f[p[1]]=1;});
+  } else {
+    facts(s).forEach(function(r){ bankFor(s).forEach(function(b){ if(r[1].indexOf(b)>=0)f[b]=1; }); });
+  }
+  return f;
+}
+
+function slotHTML(s,i){
+  var typeBtns=["line","bar","pie"].map(function(t){
+    return '<button data-w="'+i+'" data-type="'+t+'" aria-pressed="'+(s.type===t)+'">'+t.charAt(0).toUpperCase()+t.slice(1)+'</button>';}).join("");
+  if(i===1)typeBtns+='<button data-w="1" data-type="off" aria-pressed="'+(!s.on)+'">None</button>';
+  var body="";
+  if(s.on){
+    body=
+    '<details><summary>Set up chart '+(i===0?"A":"B")+'</summary><div class="panel">'+
+      '<div class="fld"><label>Measuring</label><input data-w="'+i+'" data-f="label" value="'+esc(s.label)+'"></div>'+
+      (s.type!=="pie"?'<div class="fld"><label>Units</label><input data-w="'+i+'" data-f="unit" value="'+esc(s.unit)+'"></div>'+
+      '<div class="fld"><label>Axis maximum</label><input data-w="'+i+'" data-f="max" type="number" inputmode="decimal" value="'+s.max+'" min="1"></div>':"")+
+      '<hr class="rule">'+
+      (s.type==="pie"
+        ? '<h2>Slices</h2><div>'+s.slices.map(function(sl,j){
+            return '<div class="row"><span class="sw" style="background:'+PAL[j%4][0]+'"></span><input data-w="'+i+'" data-sl="'+j+'" value="'+esc(sl.name)+'">'+
+            (s.slices.length>2?'<button class="del" data-w="'+i+'" data-dsl="'+j+'">Remove</button>':'')+'</div>';}).join("")+'</div>'+
+          '<div class="row"><input data-w="'+i+'" data-new="slice" placeholder="e.g. Households"><button data-w="'+i+'" data-add="slice">Add slice</button></div>'
+        : '<h2>'+(s.type==="bar"?"Categories":"Time periods")+' — the x-axis</h2><div>'+s.cats.map(function(c,j){
+            return '<div class="row"><input data-w="'+i+'" data-c="'+j+'" value="'+esc(c)+'">'+
+            (nC(s)>2?'<button class="del" data-w="'+i+'" data-dc="'+j+'">Remove</button>':'')+'</div>';}).join("")+'</div>'+
+          '<div class="row"><input data-w="'+i+'" data-new="cat" placeholder="'+(s.type==="bar"?"e.g. Vietnam":"e.g. 2030")+'"><button data-w="'+i+'" data-add="cat">Add</button></div>'+
+          '<hr class="rule"><h2>'+(s.type==="bar"?"Bar groups":"Lines")+'</h2><div>'+s.series.map(function(se,j){
+            return '<div class="row"><span class="sw" style="background:'+PAL[j%4][0]+'"></span><input data-w="'+i+'" data-sn="'+j+'" value="'+esc(se.name)+'">'+
+            (s.series.length>1?'<button class="del" data-w="'+i+'" data-dsn="'+j+'">Remove</button>':'')+'</div>';}).join("")+'</div>'+
+          '<div class="row"><input data-w="'+i+'" data-new="series" placeholder="e.g. Vietnam"><button data-w="'+i+'" data-add="series">Add</button></div>')+
+    '</div></details>'+
+    '<div class="card"><svg data-w="'+i+'" viewBox="0 0 720 '+(s.type==="pie"?"356":"420")+'" role="application" aria-label="Editable chart"></svg></div>'+
+    (s.type!=="pie"?'<div class="legend" data-lg="'+i+'"></div>':"")+
+    '<p class="readout" data-ro="'+i+'">Drag the data to begin.</p>'+
+    '<div class="bar"><button data-w="'+i+'" data-act="shape">New shape</button></div>'+
+    '<h2>'+(s.type==="pie"?"Proportions":(s.type==="bar"?"Comparisons":"Segment by segment"))+' <span class="of" data-wh="'+i+'"></span></h2>'+
+    '<ol data-list="'+i+'"></ol>'+
+    (s.type==="line"?'<h2>Points worth naming</h2><p class="notes" data-notes="'+i+'"></p><h2>Comparisons between lines</h2><p class="notes" data-comps="'+i+'"></p>':"")+
+    '<h2>Language bank</h2><div class="chips" data-chips="'+i+'"></div><p class="score" data-score="'+i+'"></p>';
+  }
+  return '<div class="slot"><div class="seg-ctl">'+typeBtns+'</div>'+body+'</div>';
+}
+
+function render(){
+  document.getElementById("slots").innerHTML=slots.map(slotHTML).join("");
+  slots.forEach(function(s,i){
+    if(!s.on)return;
+    if(s.act>=s.series.length)s.act=0;
+    var svg=document.querySelector('svg[data-w="'+i+'"]');
+    svg.innerHTML = s.type==="pie"?drawPie(s,i):(s.type==="bar"?drawBar(s,i):drawLine(s,i));
+
+    var lg=document.querySelector('[data-lg="'+i+'"]');
+    if(lg)lg.innerHTML=s.series.map(function(se,j){
+      return '<button class="lg" data-w="'+i+'" data-k="'+j+'" aria-pressed="'+(j===s.act)+'"><span class="sw" style="background:'+PAL[j%4][0]+'"></span>'+esc(se.name)+'</button>';}).join("");
+
+    var wh=document.querySelector('[data-wh="'+i+'"]');
+    if(wh)wh.textContent=(s.type==="line"&&s.series[s.act])?"— "+s.series[s.act].name:"";
+
+    document.querySelector('[data-list="'+i+'"]').innerHTML=facts(s).map(function(r){
+      return '<li><span class="k">'+esc(r[0])+'</span><span class="verb'+(masked?" masked":"")+'">'+(masked?"— — —":esc(r[1]))+'</span>'+
+             (r[2]?'<span class="num">'+esc(r[2])+'</span>':"")+'</li>';}).join("");
+
+    var nt=document.querySelector('[data-notes="'+i+'"]');
+    if(nt){var A=s.series[s.act],pn=A?pointNotes(s,A):[];
+      nt.innerHTML=masked?"— — —":(pn.map(function(p){return "In "+esc(p[0])+", "+esc(A.name)+" "+p[1];}).join(" &middot; ")||"No clear peak, low or dip on this line yet.");}
+    var cp=document.querySelector('[data-comps="'+i+'"]');
+    if(cp){var cr=crossings(s);
+      cp.innerHTML=masked?"— — —":(cr.map(esc).join(" &middot; ")||(s.series.length<2?"Add a second line to generate comparisons.":"The lines never cross — try dragging one across the other."));}
+
+    var f=lit(s);
+    document.querySelector('[data-chips="'+i+'"]').innerHTML=bankFor(s).map(function(b){
+      return '<span class="chip'+(f[b]?" on":"")+'">'+b+'</span>';}).join("");
+    var A2=s.series[s.act];
+    document.querySelector('[data-score="'+i+'"]').textContent=masked?"language hidden":
+      (Object.keys(f).length+" of 10 on screen"+(s.type==="line"&&A2?" · overall, "+A2.name+" "+overall(A2):""));
+  });
+}
+
+function say(i,txt,val){
+  var el=document.querySelector('[data-ro="'+i+'"]');
+  if(el)el.innerHTML=masked?"Language hidden — say it aloud, then reveal.":txt+(val?'<span class="val">'+val+'</span>':"");
+}
+
+function setPt(w,k,ci,val){
+  var s=slots[w]; s.series[k].values[ci]=val; s.act=k; render();
+  var A=s.series[k];
+  if(s.type==="bar")say(w,esc(A.name)+" in "+esc(s.cats[ci]),fmt(s,val)+" "+esc(s.unit));
+  else{var j=ci>0?ci-1:0;
+    say(w,esc(A.name)+", "+esc(s.cats[j])+"–"+esc(s.cats[j+1])+": "+verbOf(A.values[j],A.values[j+1]),fmt(s,val)+" "+esc(s.unit));}
+}
+function setPie(w,b,cumPct){
+  var s=slots[w],before=0,i;
+  for(i=0;i<b;i++)before+=s.slices[i].pct;
+  var pair=s.slices[b].pct+s.slices[b+1].pct;
+  var np=Math.max(2,Math.min(pair-2,cumPct-before));
+  s.slices[b].pct=np; s.slices[b+1].pct=pair-np;
+  render();
+  say(w,esc(s.slices[b].name)+" and "+esc(s.slices[b+1].name)+" now split "+Math.round(np)+"% / "+Math.round(pair-np)+"%","");
+}
+
+document.addEventListener("pointerdown",function(e){
+  var t=e.target; if(!t.classList||!t.classList.contains("hit"))return;
+  drag={t:t.dataset.t,w:+t.dataset.w,s:+t.dataset.s,i:+t.dataset.i,b:+t.dataset.b,el:t};
+  t.setPointerCapture(e.pointerId); e.preventDefault();
+  if(drag.t==="pt")setPt(drag.w,drag.s,drag.i,slots[drag.w].series[drag.s].values[drag.i]);
+});
+document.addEventListener("pointermove",function(e){
+  if(!drag)return;
+  var s=slots[drag.w],svg=document.querySelector('svg[data-w="'+drag.w+'"]');
+  if(!svg)return;
+  var r=svg.getBoundingClientRect(),vbH=s.type==="pie"?356:420,sc=vbH/r.height;
+  if(drag.t==="pt")setPt(drag.w,drag.s,drag.i,toVal(s,(e.clientY-r.top)*sc));
+  else{
+    var vx=(e.clientX-r.left)*(720/r.width), vy=(e.clientY-r.top)*sc;
+    var ang=(Math.atan2(vy-178,vx-360)*180/Math.PI+90+360)%360;
+    setPie(drag.w,drag.b,ang/360*100);
+  }
+});
+function stop(){drag=null;}
+document.addEventListener("pointerup",stop);
+document.addEventListener("pointercancel",stop);
+
+document.addEventListener("keydown",function(e){
+  var t=e.target; if(!t.classList||!t.classList.contains("hit"))return;
+  if(e.key!=="ArrowUp"&&e.key!=="ArrowDown")return;
+  e.preventDefault();
+  var w=+t.dataset.w,s=slots[w],up=e.key==="ArrowUp",sel;
+  if(t.dataset.t==="pt"){
+    var k=+t.dataset.s,ci=+t.dataset.i,step=s.max*(e.shiftKey?.08:.02),p=Math.pow(10,dec(s));
+    var nv=Math.max(0,Math.min(s.max,s.series[k].values[ci]+(up?step:-step)));
+    setPt(w,k,ci,Math.round(nv*p)/p);
+    sel='.hit[data-t="pt"][data-w="'+w+'"][data-s="'+k+'"][data-i="'+ci+'"]';
+  } else {
+    var b=+t.dataset.b,before=0;
+    for(var i=0;i<b;i++)before+=s.slices[i].pct;
+    setPie(w,b,before+s.slices[b].pct+(up?(e.shiftKey?4:1):(e.shiftKey?-4:-1)));
+    sel='.hit[data-t="pie"][data-w="'+w+'"][data-b="'+b+'"]';
+  }
+  var el=document.querySelector(sel); if(el)el.focus();
+});
+
+document.getElementById("slots").addEventListener("click",function(e){
+  var t=e.target.closest("button"); if(!t)return;
+  var w=+t.dataset.w,s=slots[w];
+  if(t.dataset.type){
+    if(t.dataset.type==="off"){s.on=false;}
+    else{
+      if(!s.on)s.on=true;
+      if(t.dataset.type==="pie"&&s.type!=="pie")
+        s.slices=s.cats.slice(0,6).map(function(c,j){return {name:c,pct:s.series[0].values[j]||10};}),normPie(s);
+      if(t.dataset.type!=="pie"&&s.type==="pie"){
+        s.cats=s.slices.map(function(x){return x.name;});
+        s.series=[{name:s.series[0]?s.series[0].name:"Share",values:s.slices.map(function(x){return Math.round(x.pct);})}];
+        s.max=100;
+      }
+      s.type=t.dataset.type;
+    }
+    render();return;
+  }
+  if(t.dataset.k!==undefined){s.act=+t.dataset.k;render();return;}
+  if(t.dataset.act==="shape"){
+    if(s.type==="pie"){
+      var n=s.slices.length,raw=[],tot=0;
+      for(var q=0;q<n;q++){var rv=8+Math.random()*40;raw.push(rv);tot+=rv;}
+      s.slices.forEach(function(sl,j){sl.pct=raw[j]/tot*100;});
+    } else s.series.forEach(function(se){
+      var a=[Math.round(s.max*(.15+Math.random()*.5))];
+      for(var q=1;q<nC(s);q++){var rr=Math.random(),d;
+        if(rr<.18)d=0;else if(rr<.5)d=Math.random()*.22+.04;
+        else if(rr<.82)d=-(Math.random()*.22+.04);
+        else d=(Math.random()<.5?1:-1)*(Math.random()*.35+.32);
+        var p=Math.pow(10,dec(s));
+        a.push(Math.max(s.max*.03,Math.min(s.max*.97,Math.round(a[q-1]*(1+d)*p)/p)));}
+      se.values=a;});
+    render();return;
+  }
+  if(t.dataset.dc!==undefined&&nC(s)>2){var j=+t.dataset.dc;s.cats.splice(j,1);s.series.forEach(function(se){se.values.splice(j,1);});render();return;}
+  if(t.dataset.dsn!==undefined&&s.series.length>1){s.series.splice(+t.dataset.dsn,1);render();return;}
+  if(t.dataset.dsl!==undefined&&s.slices.length>2){s.slices.splice(+t.dataset.dsl,1);normPie(s);render();return;}
+  if(t.dataset.add==="cat"&&nC(s)<12){
+    var f=document.querySelector('[data-w="'+w+'"][data-new="cat"]'),lbl=f.value.trim()||("Item "+(nC(s)+1));
+    s.cats.push(lbl);s.series.forEach(function(se){se.values.push(se.values[se.values.length-1]);});render();return;}
+  if(t.dataset.add==="series"&&s.series.length<4){
+    var f2=document.querySelector('[data-w="'+w+'"][data-new="series"]'),nm=f2.value.trim()||("Set "+(s.series.length+1)),vals=[];
+    for(var z=0;z<nC(s);z++)vals.push(Math.round(s.max*.35*(1+z*.09)));
+    s.series.push({name:nm,values:vals});s.act=s.series.length-1;render();return;}
+  if(t.dataset.add==="slice"&&s.slices.length<6){
+    var f3=document.querySelector('[data-w="'+w+'"][data-new="slice"]'),nm3=f3.value.trim()||("Slice "+(s.slices.length+1));
+    s.slices.forEach(function(x){x.pct*=0.85;});s.slices.push({name:nm3,pct:15});normPie(s);render();return;}
+});
+
+document.getElementById("slots").addEventListener("input",function(e){
+  var t=e.target; if(t.tagName!=="INPUT"||t.dataset.new!==undefined)return;
+  var w=+t.dataset.w; if(isNaN(w))return;
+  var s=slots[w],key=null;
+  if(t.dataset.f==="label"){s.label=t.value;key='[data-w="'+w+'"][data-f="label"]';}
+  else if(t.dataset.f==="unit"){s.unit=t.value;key='[data-w="'+w+'"][data-f="unit"]';}
+  else if(t.dataset.f==="max"){var m=parseFloat(t.value);if(!isFinite(m)||m<=0)return;
+    var f=m/s.max;s.max=m;s.series.forEach(function(se){se.values=se.values.map(function(v){var p=Math.pow(10,dec(s));return Math.min(m,Math.round(v*f*p)/p);});});
+    key='[data-w="'+w+'"][data-f="max"]';}
+  else if(t.dataset.c!==undefined){s.cats[+t.dataset.c]=t.value;key='[data-w="'+w+'"][data-c="'+t.dataset.c+'"]';}
+  else if(t.dataset.sn!==undefined){s.series[+t.dataset.sn].name=t.value;key='[data-w="'+w+'"][data-sn="'+t.dataset.sn+'"]';}
+  else if(t.dataset.sl!==undefined){s.slices[+t.dataset.sl].name=t.value;key='[data-w="'+w+'"][data-sl="'+t.dataset.sl+'"]';}
+  else return;
+  var pos=t.selectionStart,openIdx=[];
+  document.querySelectorAll("details").forEach(function(d,ix){if(d.open)openIdx.push(ix);});
+  render();
+  document.querySelectorAll("details").forEach(function(d,ix){if(openIdx.indexOf(ix)>=0)d.open=true;});
+  var el=document.querySelector(key);
+  if(el){el.focus();try{el.setSelectionRange(pos,pos);}catch(x){}}
+});
+
+var mb=document.getElementById("mask");
+mb.onclick=function(){masked=!masked;mb.setAttribute("aria-pressed",masked?"true":"false");
+  mb.textContent=masked?"Show language":"Hide language";render();};
+
+function copyOut(btn,text,label){
+  function ok(){btn.textContent="Copied";setTimeout(function(){btn.textContent=label;},1400);}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(ok,ok);
+  else{var ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();ok();}
+}
+document.getElementById("copy").onclick=function(){
+  var out=[];
+  slots.forEach(function(s,i){
+    if(!s.on)return;
+    out.push((i===0?"CHART A":"CHART B")+" — "+s.label+" ("+s.type+")");
+    if(s.type==="line"){
+      s.series.forEach(function(se){
+        out.push("  "+se.name+":");
+        for(var q=0;q<nC(s)-1;q++)out.push("    Between "+s.cats[q]+" and "+s.cats[q+1]+", "+se.name+" "+verbOf(se.values[q],se.values[q+1])+" from "+fmt(s,se.values[q])+" to "+fmt(s,se.values[q+1])+(s.unit?" "+s.unit:"")+".");
+        pointNotes(s,se).forEach(function(p){out.push("    In "+p[0]+", "+se.name+" "+p[1]+".");});
+        out.push("    Overall, "+se.name+" "+overall(se)+".");});
+      var cr=crossings(s); if(cr.length)out.push("  Comparisons: "+cr.join("; ")+".");
+    } else facts(s).forEach(function(r){out.push("  "+r[0]+" "+r[1]+".");});
+    out.push("");
+  });
+  copyOut(this,out.join("\n"),"Copy sentences");
+};
+document.getElementById("task").onclick=function(){
+  var on=slots.filter(function(s){return s.on;}),parts=on.map(function(s){
+    if(s.type==="pie")return "the chart below shows "+s.label.toLowerCase();
+    var who=s.series.map(function(x){return x.name;});
+    var w=who.length>1?who.slice(0,-1).join(", ")+" and "+who[who.length-1]:who[0];
+    return (s.type==="bar"?"the chart":"the graph")+" below shows "+s.label.toLowerCase()+(s.unit?", in "+s.unit+",":"")+
+      (s.type==="bar"?" for "+s.cats.join(", "):" for "+w+" between "+s.cats[0]+" and "+s.cats[nC(s)-1]);});
+  var lead=parts.join(", and ").replace(/^./,function(c){return c.toUpperCase();});
+  copyOut(this,lead+".\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.\n\nWrite at least 150 words.","Copy task rubric");
+};
+
+render();
+})();
+</script>
