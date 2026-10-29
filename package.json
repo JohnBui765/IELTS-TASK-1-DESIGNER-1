@@ -1,0 +1,13 @@
+{
+  "name": "task1-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Task 1 Studio — iPhone-first PWA for IELTS Academic Writing Task 1: generated charts, maps and processes, model language, drills and a writing checker.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/unit/*.test.js",
+    "serve": "node tools/serve.mjs",
+    "e2e": "node tests/e2e/flows.mjs",
+    "check": "node tools/update-sw.mjs --check && node tools/build-docs.mjs --check"
+  }
+}

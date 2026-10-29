@@ -1,0 +1,220 @@
+/* Charts (js/render/chart-svg.js). Marks carry the series colours; every
+   label uses text tokens. Gridlines and axes are hairlines. */
+
+.chart {
+  margin: 0;
+}
+
+.ch-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--label);
+}
+
+.ch-unit,
+.ch-unit-line {
+  font-weight: 400;
+  color: var(--label-2);
+}
+
+.ch-unit-line {
+  margin: -4px 0 8px;
+  font-size: 13px;
+}
+
+.ch-body {
+  position: relative;
+  width: 100%;
+  min-height: 120px;
+}
+
+.ch-svg {
+  display: block;
+  overflow: visible;
+  font-family: var(--font);
+}
+
+.ch-grid {
+  stroke: var(--chart-grid);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.ch-axis {
+  stroke: var(--chart-axis);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.ch-tick {
+  fill: var(--label-2);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ch-note {
+  fill: var(--label-2);
+  font-size: 11px;
+  font-style: italic;
+}
+
+.ch-projected {
+  fill: var(--fill);
+  opacity: 0.5;
+}
+
+.ch-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.ch-line.projected {
+  stroke-dasharray: 6 5;
+}
+
+.ch-bar,
+.ch-slice {
+  stroke: var(--card);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.ch-in,
+.ch-out,
+.ch-caption {
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ch-out {
+  fill: var(--label);
+}
+
+.ch-caption {
+  fill: var(--label);
+  font-size: 14px;
+}
+
+.ch-hit {
+  fill: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+.ch-hit:focus-visible {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.ch-knob {
+  fill: var(--card);
+  stroke: var(--label);
+  stroke-width: 2.5;
+  pointer-events: none;
+}
+
+/* Editing: the chart takes the finger (no page scroll while dragging). */
+.chart.editing .ch-body {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.chart.editing .ch-hit {
+  cursor: ns-resize;
+}
+
+.chart.editing .ch-svg {
+  outline: 2px dashed var(--accent-tint);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.ch-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--label);
+}
+
+.ch-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ch-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.ch-readout {
+  min-height: 20px;
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.ch-readout:empty {
+  display: none;
+}
+
+/* Tables (also the "Data" view of every chart) */
+.ch-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ch-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ch-table th,
+.ch-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--separator);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ch-table th[scope='row'] {
+  text-align: left;
+  font-weight: 500;
+  white-space: normal;
+  min-width: 6em;
+}
+
+.ch-table thead th {
+  color: var(--label-2);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.ch-cell {
+  width: 4.6em;
+  min-height: 34px;
+  padding: 4px 6px;
+  border: 1px solid var(--separator);
+  border-radius: 7px;
+  background: var(--card);
+  color: var(--label);
+  font: inherit;
+  font-size: 16px;
+  text-align: right;
+}

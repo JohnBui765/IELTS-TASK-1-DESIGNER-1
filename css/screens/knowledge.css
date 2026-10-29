@@ -1,0 +1,168 @@
+/* Knowledge tab, entry and entry editor */
+
+.kb-search {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.kb-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 calc(-1 * var(--gutter));
+}
+
+.kb-chip-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 0 var(--gutter) 2px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.kb-chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.kb-chip-row .chip {
+  flex: none;
+}
+
+.kb-count {
+  margin: 12px 4px 0;
+  color: var(--label-2);
+  font-size: 13px;
+}
+
+.kb-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.kb-practise {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.kb-row .row-title {
+  white-space: normal;
+  font-size: 15px;
+  line-height: 21px;
+}
+
+.kb-badges {
+  display: flex;
+  gap: 4px;
+  flex: none;
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.entry-hero {
+  padding: 18px;
+}
+
+.entry-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.entry-text {
+  margin: 12px 0 0;
+  font-size: 21px;
+  line-height: 29px;
+  letter-spacing: -0.01em;
+}
+
+.entry-pattern {
+  margin: 8px 0 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--label-2);
+}
+
+.entry-meta {
+  margin: 8px 0 0;
+  color: var(--label-2);
+  font-size: 13px;
+}
+
+.entry-note {
+  margin-top: 14px;
+}
+
+.entry-example .row-title {
+  white-space: normal;
+  font-size: 15px;
+  line-height: 21px;
+}
+
+.entry-edit .ee-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.ee-label {
+  color: var(--label-2);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ee-help {
+  color: var(--label-2);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.ee-select {
+  width: 100%;
+}
+
+.ee-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 6px 0 16px;
+}
+
+.ee-example {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.ee-example .textarea {
+  width: 100%;
+}
+
+.ee-problems p {
+  margin: 4px 0;
+  color: var(--orange-text);
+  font-size: 13px;
+}

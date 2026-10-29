@@ -1,0 +1,168 @@
+/* Add knowledge (import from Claude) and Imports */
+
+.import-screen .scroll-inner > * + * {
+  margin-top: 14px;
+}
+
+.imp-step {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+}
+
+.imp-step p {
+  margin: 0;
+  color: var(--label-2);
+  font-size: 14px;
+  line-height: 19px;
+}
+
+.imp-step-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+}
+
+.imp-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--accent-fill);
+  color: var(--on-fill);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.imp-tools {
+  display: flex;
+  gap: 8px;
+}
+
+.imp-summary {
+  margin: 4px 4px 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.imp-pack {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 4px 0;
+  color: var(--label-2);
+  font-size: 13px;
+}
+
+.imp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  background: var(--card);
+  color: var(--label);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.imp-item + .imp-item {
+  border-top: 1px solid var(--separator);
+}
+
+.imp-check {
+  flex: none;
+  color: var(--label-3);
+}
+
+.imp-item.on .imp-check {
+  color: var(--accent);
+}
+
+.imp-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.imp-text {
+  font-size: 15px;
+  line-height: 21px;
+}
+
+.imp-sub {
+  color: var(--label-2);
+  font-size: 13px;
+}
+
+.imp-problem {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin: 0;
+  color: var(--orange-text);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.imp-problem .icon {
+  flex: none;
+  margin-top: 1px;
+}
+
+.imp-muted {
+  margin: 0;
+  padding: 12px 14px;
+  color: var(--label-2);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.imp-error {
+  color: var(--red-text);
+}
+
+.ct-ok {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 0;
+  color: var(--green-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ct-status:empty {
+  display: none;
+}
+
+.model-text {
+  margin: 0;
+  font-size: 16px;
+  line-height: 25px;
+  white-space: pre-wrap;
+}
+
+.model-card {
+  padding: 16px;
+}
+
+.model-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ct-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Map preview</title>
+  <link rel="stylesheet" href="../../css/app.css">
+  <link rel="stylesheet" href="../../css/screens/map.css">
+  <style>
+    html, body { position: static; height: auto; overflow: visible; }
+    body { padding: 16px; }
+    .card { background: var(--card); border-radius: 14px; padding: 16px 14px 12px; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module">
+    // Renders maps for tests/e2e/map-preview.mjs. ?setting=&frame=&seed=&theme=&hl=1&batch=N
+    import { makeRng } from '../../js/core/rng.js';
+    import { generateMap, describeMap } from '../../js/core/maps.js';
+    import { renderMapPair } from '../../js/render/map-svg.js';
+
+    const q = new URLSearchParams(location.search);
+    if (q.get('theme')) document.documentElement.dataset.theme = q.get('theme');
+    const now = Date.UTC(2026, 9, 28);
+    const root = document.getElementById('root');
+
+    // Label problems in one rendered pair: overlaps, clipping, overflow, tiny text.
+    function audit(el) {
+      const out = [];
+      for (const s of el.querySelectorAll('svg.map-svg')) {
+        const vbw = s.viewBox.baseVal.width;
+        const scale = s.getBoundingClientRect().width / vbw;
+        const frame = s.querySelector('.map-frame').getBoundingClientRect();
+        const texts = [...s.querySelectorAll('text.map-t')];
+        const boxes = texts.map((t) => t.getBoundingClientRect());
+        texts.forEach((t, i) => {
+          const b = boxes[i];
+          const px = Number(t.getAttribute('font-size')) * scale;
+          if (px < 10.5) out.push(`small ${t.textContent} ${px.toFixed(1)}px`);
+          if (b.left < frame.left - 0.5 || b.right > frame.right + 0.5 || b.top < frame.top - 0.5 || b.bottom > frame.bottom + 0.5) out.push(`clipped ${t.textContent}`);
+          for (let j = i + 1; j < texts.length; j++) {
+            const c = boxes[j];
+            if (b.left < c.right - 1 && c.left < b.right - 1 && b.top < c.bottom - 1 && c.top < b.bottom - 1) out.push(`overlap ${t.textContent} / ${texts[j].textContent}`);
+          }
+          const shape = s.querySelector(`.mf[data-id="${t.dataset.id}"]`);
+          const inside = !t.classList.contains('map-t-out') && shape && !/map-(road|river|rail|path|square-strip|square-edge|sea|pier)/.test(shape.getAttribute('class'));
+          if (inside) {
+            const r = shape.getBoundingClientRect();
+            if (b.left < r.left - 1 || b.right > r.right + 1 || b.top < r.top - 1 || b.bottom > r.bottom + 1) out.push(`overflow ${t.textContent}`);
+          }
+        });
+      }
+      return out;
+    }
+
+    function one(setting, frame, seed, hl) {
+      const map = generateMap(makeRng(seed), { now, setting: setting || null, frame: frame || null });
+      const t0 = performance.now();
+      const pair = renderMapPair(map);
+      const ms = performance.now() - t0;
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.append(pair.el);
+      root.append(card);
+      if (hl) {
+        const d = describeMap(map);
+        const line = d.body.find((l) => l.focus !== 'unchanged');
+        pair.setHighlight(line.featureIds);
+      }
+      const nodes = pair.el.querySelectorAll('*').length;
+      return { map, ms, nodes, problems: audit(pair.el) };
+    }
+
+    const batch = Number(q.get('batch') || 0);
+    if (batch) {
+      const report = { maps: 0, maxMs: 0, maxNodes: 0, problems: [] };
+      const settings = ['village', 'town', 'campus', 'island', 'park', 'coast', 'industrial', 'school', 'hospital'];
+      for (let i = 0; i < batch; i++) {
+        root.textContent = '';
+        const r = one(settings[i % settings.length], ['past', 'present', 'future'][i % 3], 1000 + i, false);
+        report.maps++;
+        if (i === 0) report.firstMs = r.ms;
+        else report.maxMs = Math.max(report.maxMs, r.ms);
+        report.maxNodes = Math.max(report.maxNodes, r.nodes);
+        for (const p of r.problems) report.problems.push(`${r.map.setting} seed ${1000 + i}: ${p}`);
+      }
+      window.__report = report;
+    } else {
+      const r = one(q.get('setting'), q.get('frame'), Number(q.get('seed') || 1), q.get('hl') === '1');
+      window.__report = { ms: r.ms, nodes: r.nodes, problems: r.problems, place: r.map.place };
+    }
+    window.__ready = true;
+  </script>
+</body>
+</html>

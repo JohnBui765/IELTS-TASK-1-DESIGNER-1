@@ -1,0 +1,139 @@
+/* Write screen */
+
+.w-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 8px var(--gutter);
+  background: var(--material-thick);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.w-clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.w-time.low {
+  color: var(--orange-text);
+}
+
+.w-time.over {
+  color: var(--red-text);
+}
+
+.w-words {
+  color: var(--label-2);
+}
+
+.w-words.enough {
+  color: var(--green-text);
+}
+
+.w-question {
+  margin: 10px 0 10px;
+  color: var(--label-2);
+  font-size: 14px;
+  line-height: 19px;
+}
+
+.w-area {
+  display: block;
+  width: 100%;
+  min-height: 52vh;
+  padding: 14px;
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  color: var(--label);
+  font: inherit;
+  font-size: 17px;
+  line-height: 26px;
+  resize: vertical;
+}
+
+.w-area:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.w-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  scroll-margin-top: 60px;
+}
+
+.w-results:empty {
+  display: none;
+}
+
+.w-summary,
+.w-issue,
+.w-credits,
+.w-claude {
+  padding: 14px 16px;
+}
+
+.w-summary-title {
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 700;
+}
+
+.w-summary-sub {
+  font-weight: 500;
+  color: var(--label-2);
+}
+
+.w-summary-note,
+.w-issue p,
+.w-claude p {
+  margin: 6px 0 0;
+  color: var(--label-2);
+  font-size: 14px;
+  line-height: 19px;
+}
+
+.w-issue-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.w-issue.error .w-issue-head {
+  color: var(--red-text);
+}
+
+.w-issue.warn .w-issue-head {
+  color: var(--orange-text);
+}
+
+.w-issue.tip .w-issue-head,
+.w-credits .w-issue-head {
+  color: var(--green-text);
+}
+
+.w-matches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.w-claude .btn {
+  margin-top: 10px;
+}
+
+.w-sheet .visual-card {
+  margin-top: 12px;
+}

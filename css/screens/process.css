@@ -1,0 +1,54 @@
+/* Process diagrams (js/render/process-svg.js) */
+
+.process {
+  margin: 0;
+}
+
+.pr-body {
+  width: 100%;
+  min-height: 120px;
+}
+
+.pr-svg {
+  display: block;
+  overflow: visible;
+  font-family: var(--font);
+}
+
+.pr-box {
+  fill: var(--accent-tint);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.pr-num {
+  fill: var(--accent-fill);
+}
+
+.pr-num-text {
+  fill: var(--on-fill);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pr-label {
+  fill: var(--label);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.pr-arrow {
+  fill: none;
+  stroke: var(--label-2);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pr-return {
+  stroke-dasharray: 5 5;
+}
+
+.pr-head {
+  fill: var(--label-2);
+}

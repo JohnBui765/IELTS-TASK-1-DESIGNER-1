@@ -1,0 +1,442 @@
+/* Maps (js/render/map-svg.js): two schematic maps, stacked on a phone and side
+   by side in a wide container. Fills come from the --map-* tokens; every label
+   uses the text tokens. Sizes are SVG units (a map is 372 units wide). */
+
+:root {
+  --map-land: #f4f2ec;
+  --map-frame: #b3ada2;
+  --map-building: #ddd7cd;
+  --map-building-edge: #a1998c;
+  --map-houses: #f1d1b1;
+  --map-houses-edge: #c49770;
+  --map-shops: #dfcdef;
+  --map-shops-edge: #a68ec6;
+  --map-industry: #cad0d9;
+  --map-industry-edge: #8b95a4;
+  --map-carpark: #e2e2e4;
+  --map-carpark-edge: #a7a7ac;
+  --map-square: #ece5d7;
+  --map-square-edge: #c2b59c;
+  --map-park: #d4ebc7;
+  --map-park-edge: #9cc888;
+  --map-sports: #c1e3b0;
+  --map-sports-edge: #81ba69;
+  --map-pitch: rgba(255, 255, 255, 0.9);
+  --map-wood: #bfdead;
+  --map-wood-edge: #84b770;
+  --map-tree: #9bc786;
+  --map-farm: #f2e9c6;
+  --map-farm-edge: #cdbc82;
+  --map-furrow: #e2d49f;
+  --map-water: #c5e2f5;
+  --map-water-edge: #8bc0e2;
+  --map-beach: #f6e8bd;
+  --map-beach-edge: #d6c084;
+  --map-road: #ffffff;
+  --map-road-edge: #b4ada1;
+  --map-path: #8c8172;
+  --map-rail: #6d6862;
+  --map-pier: #d9c29b;
+  --map-pier-edge: #9a8157;
+  --map-hl: var(--accent);
+  --map-hl-tint: rgba(88, 86, 214, 0.14);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --map-land: #27272b;
+    --map-frame: #5a5a61;
+    --map-building: #4c4943;
+    --map-building-edge: #716b62;
+    --map-houses: #6b4c36;
+    --map-houses-edge: #8f684a;
+    --map-shops: #4f4367;
+    --map-shops-edge: #706090;
+    --map-industry: #3f4653;
+    --map-industry-edge: #616b7c;
+    --map-carpark: #3c3c41;
+    --map-carpark-edge: #5c5c63;
+    --map-square: #48423a;
+    --map-square-edge: #675f52;
+    --map-park: #2d4a2b;
+    --map-park-edge: #446b3f;
+    --map-sports: #2f5a2d;
+    --map-sports-edge: #4a8243;
+    --map-pitch: rgba(255, 255, 255, 0.3);
+    --map-wood: #28492e;
+    --map-wood-edge: #3f6c45;
+    --map-tree: #37613d;
+    --map-farm: #4b4531;
+    --map-farm-edge: #6d6447;
+    --map-furrow: #5b543a;
+    --map-water: #1f3f5a;
+    --map-water-edge: #33658c;
+    --map-beach: #5b5032;
+    --map-beach-edge: #7d6f45;
+    --map-road: #57575e;
+    --map-road-edge: #7a7a82;
+    --map-path: #a8a093;
+    --map-rail: #b3ada3;
+    --map-pier: #6f5d41;
+    --map-pier-edge: #937b56;
+    --map-hl-tint: rgba(125, 122, 255, 0.22);
+  }
+}
+
+:root[data-theme='dark'] {
+  --map-land: #27272b;
+  --map-frame: #5a5a61;
+  --map-building: #4c4943;
+  --map-building-edge: #716b62;
+  --map-houses: #6b4c36;
+  --map-houses-edge: #8f684a;
+  --map-shops: #4f4367;
+  --map-shops-edge: #706090;
+  --map-industry: #3f4653;
+  --map-industry-edge: #616b7c;
+  --map-carpark: #3c3c41;
+  --map-carpark-edge: #5c5c63;
+  --map-square: #48423a;
+  --map-square-edge: #675f52;
+  --map-park: #2d4a2b;
+  --map-park-edge: #446b3f;
+  --map-sports: #2f5a2d;
+  --map-sports-edge: #4a8243;
+  --map-pitch: rgba(255, 255, 255, 0.3);
+  --map-wood: #28492e;
+  --map-wood-edge: #3f6c45;
+  --map-tree: #37613d;
+  --map-farm: #4b4531;
+  --map-farm-edge: #6d6447;
+  --map-furrow: #5b543a;
+  --map-water: #1f3f5a;
+  --map-water-edge: #33658c;
+  --map-beach: #5b5032;
+  --map-beach-edge: #7d6f45;
+  --map-road: #57575e;
+  --map-road-edge: #7a7a82;
+  --map-path: #a8a093;
+  --map-rail: #b3ada3;
+  --map-pier: #6f5d41;
+  --map-pier-edge: #937b56;
+  --map-hl-tint: rgba(125, 122, 255, 0.22);
+}
+
+/* ---------- layout ---------- */
+
+.map-pair {
+  container-type: inline-size;
+}
+
+.map-pair-maps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+@container (min-width: 640px) {
+  .map-pair-maps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+.map-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--font);
+  letter-spacing: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ---------- frame, caption, north arrow ---------- */
+
+.map-land {
+  fill: var(--map-land);
+}
+
+.map-frame {
+  fill: none;
+  stroke: var(--map-frame);
+  stroke-width: 1.2;
+}
+
+.map-cap {
+  font-size: 16px;
+  font-weight: 600;
+  fill: var(--label);
+}
+
+.map-north path {
+  fill: var(--label);
+}
+
+.map-north-n {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--label);
+}
+
+/* ---------- features ---------- */
+
+.map-sea,
+.map-lake,
+.map-pool {
+  fill: var(--map-water);
+}
+
+.map-lake,
+.map-pool {
+  stroke: var(--map-water-edge);
+  stroke-width: 1;
+}
+
+.map-island {
+  fill: var(--map-land);
+  stroke: var(--map-water-edge);
+  stroke-width: 1.5;
+}
+
+.map-building {
+  fill: var(--map-building);
+  stroke: var(--map-building-edge);
+}
+
+.map-houses {
+  fill: var(--map-houses);
+  stroke: var(--map-houses-edge);
+}
+
+.map-shops {
+  fill: var(--map-shops);
+  stroke: var(--map-shops-edge);
+}
+
+.map-industry {
+  fill: var(--map-industry);
+  stroke: var(--map-industry-edge);
+}
+
+.map-carpark {
+  fill: var(--map-carpark);
+  stroke: var(--map-carpark-edge);
+}
+
+.map-square {
+  fill: var(--map-square);
+  stroke: var(--map-square-edge);
+}
+
+.map-park {
+  fill: var(--map-park);
+  stroke: var(--map-park-edge);
+}
+
+.map-beach {
+  fill: var(--map-beach);
+  stroke: var(--map-beach-edge);
+}
+
+.map-sports .map-base {
+  fill: var(--map-sports);
+  stroke: var(--map-sports-edge);
+}
+
+.map-woodland .map-base {
+  fill: var(--map-wood);
+  stroke: var(--map-wood-edge);
+}
+
+.map-farmland .map-base {
+  fill: var(--map-farm);
+  stroke: var(--map-farm-edge);
+}
+
+.map-building,
+.map-houses,
+.map-shops,
+.map-industry,
+.map-carpark,
+.map-square,
+.map-park,
+.map-beach,
+.map-base {
+  stroke-width: 1;
+}
+
+.map-texture {
+  stroke: none;
+}
+
+.map-tree {
+  fill: var(--map-tree);
+}
+
+.map-furrow {
+  stroke: var(--map-furrow);
+  stroke-width: 2.4;
+}
+
+.map-pitch {
+  fill: none;
+  stroke: var(--map-pitch);
+  stroke-width: 1.5;
+}
+
+.map-road-edge {
+  stroke: var(--map-road-edge);
+}
+
+.map-road {
+  stroke: var(--map-road);
+}
+
+.map-square-edge {
+  stroke: var(--map-square-edge);
+}
+
+.map-square-strip {
+  stroke: var(--map-square);
+}
+
+.map-river {
+  stroke: var(--map-water);
+}
+
+.map-rail {
+  stroke: var(--map-rail);
+}
+
+.map-rail-ties {
+  stroke: var(--map-rail);
+  stroke-dasharray: 2 6;
+}
+
+.map-path {
+  stroke: var(--map-path);
+  stroke-dasharray: 6 4;
+  stroke-linecap: round;
+}
+
+.map-deck {
+  fill: var(--map-road);
+}
+
+.map-parapet {
+  fill: none;
+  stroke: var(--map-rail);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.map-pier {
+  fill: var(--map-pier);
+  stroke: var(--map-pier-edge);
+  stroke-width: 1;
+}
+
+/* ---------- labels: text tokens, with a halo in the colour beneath ---------- */
+
+.map-t {
+  fill: var(--label);
+  font-weight: 500;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: var(--map-land);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.map-t-water {
+  font-style: italic;
+}
+
+.map-t-sea,
+.map-t-lake,
+.map-t-river,
+.map-t-pool {
+  stroke: var(--map-water);
+}
+
+.map-t-building {
+  stroke: var(--map-building);
+}
+
+.map-t-houses {
+  stroke: var(--map-houses);
+}
+
+.map-t-shops {
+  stroke: var(--map-shops);
+}
+
+.map-t-industry {
+  stroke: var(--map-industry);
+}
+
+.map-t-carpark {
+  stroke: var(--map-carpark);
+}
+
+.map-t-square {
+  stroke: var(--map-square);
+}
+
+.map-t-park {
+  stroke: var(--map-park);
+}
+
+.map-t-sports {
+  stroke: var(--map-sports);
+}
+
+.map-t-woodland {
+  stroke: var(--map-wood);
+}
+
+.map-t-farmland {
+  stroke: var(--map-farm);
+}
+
+.map-t-beach {
+  stroke: var(--map-beach);
+}
+
+.map-t-road {
+  stroke: var(--map-road);
+}
+
+/* ---------- highlight (drills) ---------- */
+
+.map-hl-ring {
+  fill: var(--map-hl-tint);
+  stroke: var(--map-hl);
+  stroke-width: 3;
+}
+
+.map-svg .mf,
+.map-svg .map-t {
+  transition: opacity 0.2s var(--ease-out);
+}
+
+.map-svg.has-hl .mf:not(.is-hl):not(.map-sea):not(.map-island) {
+  opacity: 0.45;
+}
+
+.map-svg.has-hl .map-t:not(.is-hl) {
+  opacity: 0.55;
+}
+
+.map-svg .map-t.is-hl {
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-svg .mf,
+  .map-svg .map-t {
+    transition: none;
+  }
+}
